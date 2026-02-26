@@ -1,1 +1,197 @@
-Hello
+Perfect 👌
+You gave a lot of mixed steps. I will now clean everything and give you the correct, professional, safe DevOps flow from start to finish — no confusion.
+This is the proper way Terraform connects to AWS and deploys infrastructure.
+
+✅ COMPLETE & CORRECT DEVOPS FLOW
+(AWS + Terraform on Fedora)
+
+🔹 PHASE 1 — AWS ACCOUNT SETUP (One Time Only)
+✅ Step 1: Create IAM User (Never Use Root)
+    1. Login to AWS Console
+    2. Go to IAM
+    3. Click Users → Create user
+    4. Username: terraform-user
+    5. Click Next
+✅ Step 2: Attach Permissions
+    • Choose Attach policies directly
+    • Select: AdministratorAccess (Learning only)
+    • Click Create user
+⚠ Production → Use custom least-privilege policy.
+
+✅ Step 3: Create Access Keys
+    1. Open terraform-user
+    2. Go to Security credentials
+    3. Click Create access key
+    4. Choose CLI
+    5. Download CSV
+You now have:
+    • AWS Access Key
+    • AWS Secret Key
+✔ AWS setup is complete.
+
+🔹 PHASE 2 — INSTALL TOOLS (Fedora)
+
+✅ Step 4: Install AWS CLI (Recommended v2)
+sudo dnf update -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+sudo dnf install unzip -y
+unzip awscliv2.zip
+sudo ./aws/install
+Verify:
+aws --version
+✔ AWS CLI installed.
+
+✅ Step 5: Configure AWS CLI
+aws configure
+Enter:
+Access Key: (from CSV)
+Secret Key: (from CSV)
+Region: us-east-1   (or your region)
+Output: json
+Test:
+aws sts get-caller-identity
+If you see Account ID → ✅ Working.
+
+✅ Step 6: Install Terraform (Safe Manual Way)
+curl -LO https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip
+unzip terraform_1.6.6_linux_amd64.zip
+sudo mv terraform /usr/local/bin/
+Verify:
+terraform version
+✔ Terraform installed.
+
+🔹 PHASE 3 — TERRAFORM PROJECT SETUP
+
+✅ Step 7: Create Project Folder
+mkdir ~/terraform-project
+cd ~/terraform-project
+
+✅ Step 8: Create Terraform File
+nano main.tf
+Paste this clean & correct working configuration:
+provider "aws" {
+  region = "us-east-1"
+}
+
+# VPC
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags = { Name = "demo-vpc" }
+}
+
+# Subnet
+resource "aws_subnet" "public" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "us-east-1a"
+  map_public_ip_on_launch = true
+  tags = { Name = "demo-subnet" }
+}
+
+# Internet Gateway
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.main.id
+}
+
+# Route Table
+resource "aws_route_table" "rt" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_route_table_association" "assoc" {
+  subnet_id      = aws_subnet.public.id
+  route_table_id = aws_route_table.rt.id
+}
+
+# Security Group
+resource "aws_security_group" "web_sg" {
+  name   = "web-sg"
+  vpc_id = aws_vpc.main.id
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Load Balancer
+resource "aws_lb" "app_lb" {
+  name               = "demo-alb"
+  load_balancer_type = "application"
+  subnets            = [aws_subnet.public.id]
+  security_groups    = [aws_security_group.web_sg.id]
+}
+Save and exit.
+
+🔹 PHASE 4 — DEPLOY SAFELY
+
+✅ Step 9: Initialize Terraform
+terraform init
+✔ Downloads AWS provider.
+
+✅ Step 10: Preview (Very Important)
+terraform plan
+✔ Shows what will be created
+✔ Does NOT create anything yet
+
+✅ Step 11: Apply
+terraform apply
+Type:
+yes
+Resources will be created.
+
+🔹 PHASE 5 — VERIFY
+Check AWS Console:
+    • VPC
+    • Subnet
+    • Internet Gateway
+    • Route Table
+    • Security Group
+    • Load Balancer
+Or via CLI:
+aws ec2 describe-vpcs
+aws elbv2 describe-load-balancers
+
+🔹 PHASE 6 — CLEANUP (Important to avoid charges)
+terraform destroy
+Type:
+yes
+Everything created by Terraform will be deleted.
+
+🎯 WHAT IS THE CORRECT DEVOPS PRACTICE?
+✔ Never use root
+✔ Always use IAM user
+✔ Always run terraform plan before apply
+✔ Keep credentials safe
+✔ Use terraform destroy to avoid charges
+✔ Use version control (Git)
+✔ Never hardcode secrets in code
+
+🧠 FINAL CLEAR SUMMARY
+Terraform login process =
+IAM User → Access Keys → AWS CLI configure → Terraform uses AWS CLI credentials automatically.
+Terraform does NOT have a login command.
+It reads credentials from:
+~/.aws/credentials
+That’s the correct architecture.
+
+If you want next:
+    • ✅ Production-ready folder structure
+    • ✅ Remote backend (S3 + DynamoDB locking)
+    • ✅ Proper 2-subnet ALB setup
+    • ✅ Full EC2 + Target Group working website
+Tell me your goal (learning / interview / job / production).
