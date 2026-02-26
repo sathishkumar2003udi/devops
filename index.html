@@ -1,13 +1,39 @@
+Lab Exercise: Install Ansible in Fedora &✅
+Configure Inventory
+
+<br>
+install Ansible
+<br>
+sudo dnf install ansible -y
+<br>
+Verify installation:<br>
+ansible --version<br><br><br>
+Step 3: Check Inventory File Location<br><br>
+🔹Default inventory file:<br>
+/etc/ansible/hosts<br>
+Open it:<br>
+sudo nano /etc/ansible/hosts<br><br>
+Step 4: Configure Inventory<br>
+🔹If Using Single VM (Localhost) in last line<br>
+🟢 Add:<br>
+[local]<br>
+localhost ansible_connection=local<br>
+Save and exit.(ctrl+o ,enter ,Ctrl+x)<br>
+<br><br><br>
+Step 6: Test Inventory
+<br>
+Run:<br>
+ansible all -m ping<br>
+Expected output:<br>
+SUCCESS => {<br>
+"ping": "pong"<br>
+}<br>
+
+
+
+
+
 <br><br><br><br><br><br><br><br><br><br><br><br>
-
-
-
-
-
-
-
-
-
 ✅ COMPLETE & CORRECT DEVOPS FLOW <br>
 (AWS + Terraform on Fedora)<br>
 <br>
