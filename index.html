@@ -68,6 +68,179 @@ git status<br>
 git pull<br><br>
 ------------------------------------
 <br>
+<h2>Ex 5</h2>
+Step for terraform login<br>
+<br>
+1.Login to AWS Console<br>
+2.Open IAM<br>
+•	✅ AdministratorAccess<br><br>
+
+3.Download AWS CLI installer<br><br>
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"<br><br>
+
+sudo dnf install unzip -y<br><br>
+
+unzip awscliv2.zip<br><br>
+<br><br>
+sudo ./aws/install
+<br><br>
+aws --version
+<br><br>
+aws configure
+<br><br>
+4.test acces <br><br> 
+aws s3 ls<br>
+<br>
+5.Install Terraform
+<br><br>
+unzip terraform_1.6.0_linux_amd64.zip<br><br>
+sudo mv terraform /usr/local/bin/<br>
+<br>
+
+terraform version<br>
+<br>
+6.Create Terraform Project<br><br>
+
+cd ~<br><br>
+mkdir terraform-project<br><br>
+cd terraform-project<br><br>
+<br><br>
+7.Create Terraform Configuration<br><br>
+
+nano main.tf<br>
+<br>
+
+provider "aws" {<br>
+  region = "us-east-1"<br>
+}<br>
+<br>
+resource "aws_s3_bucket" "demo_bucket" {<br>
+  bucket = "my-terraform-demo-bucket-123456"<br>
+  acl    = "private"<br>
+}<br>
+<br>
++++++++ OR +++++++<br>
+<br>
+provider "aws" {<br>
+  region = "ap-south-1"<br>
+}<br>
+<br>
+# VPC<br>
+resource "aws_vpc" "demo_vpc" {<br>
+  cidr_block = "10.0.0.0/16"<br>
+  tags = { Name = "demo-vpc" }<br>
+}<br>
+<br>
+# Subnet<br>
+resource "aws_subnet" "demo_subnet" {<br>
+  vpc_id            = aws_vpc.demo_vpc.id<br>
+  cidr_block        = "10.0.1.0/24"<br>
+  availability_zone = "ap-south-1a"<br>
+  tags = { Name = "demo-subnet" }<br>
+}<br>
+<br>
+# Internet Gateway<br>
+resource "aws_internet_gateway" "demo_igw" {<br>
+  vpc_id = aws_vpc.demo_vpc.id<br>
+  tags = { Name = "demo-igw" }<br>
+}<br>
+<br>
+# Route Table<br><br>
+resource "aws_route_table" "demo_route" {<br>
+  vpc_id = aws_vpc.demo_vpc.id<br>
+  route {<br>
+    cidr_block = "0.0.0.0/0"<br>
+    gateway_id = aws_internet_gateway.demo_igw.id<br>
+  }<br>
+  tags = { Name = "demo-route-table" }<br>
+}<br>
+<br>
+resource "aws_route_table_association" "demo_assoc" {<br>
+  subnet_id      = aws_subnet.demo_subnet.id<br>
+  route_table_id = aws_route_table.demo_route.id<br>
+}<br>
+<br>
+# Security Group<br>
+resource "aws_security_group" "demo_sg" {<br>
+  name        = "demo-sg"<br>
+  description = "Allow SSH & HTTP"<br>
+  vpc_id      = aws_vpc.demo_vpc.id<br>
+<br>
+  ingress {<br>
+    from_port   = 22<br>
+    to_port     = 22<br>
+    protocol    = "tcp"<br>
+    cidr_blocks = ["0.0.0.0/0"]<br>
+  }<br>
+<br>
+  ingress {<br>
+    from_port   = 80<br>
+    to_port     = 80<br>
+    protocol    = "tcp"<br>
+    cidr_blocks = ["0.0.0.0/0"]<br>
+  }<br>
+<br>
+  egress {<br>
+    from_port   = 0<br>
+    to_port     = 0<br>
+    protocol    = "-1"<br>
+    cidr_blocks = ["0.0.0.0/0"]<br>
+  }<br>
+}<br>
+<br>
+# EC2 Instance<br>
+resource "aws_instance" "demo_ec2" {<br>
+  ami           = "ami-0c02fb55956c7d316" # Amazon Linux 2<br>
+  instance_type = "t2.micro"<br>
+  subnet_id     = aws_subnet.demo_subnet.id<br>
+  security_groups = [aws_security_group.demo_sg.name]<br>
+<br>
+  tags = { Name = "demo-ec2" }<br>
+}<br>
+<br>
+# Load Balancer<br>
+resource "aws_lb" "demo_lb" {<br>
+  name               = "demo-lb"<br>
+  internal           = false<br>
+  load_balancer_type = "application"<br>
+  security_groups    = [aws_security_group.demo_sg.id]<br>
+  subnets            = [aws_subnet.demo_subnet.id]<br>
+}<br>
+<br>
+resource "aws_lb_target_group" "demo_tg" {<br>
+  name     = "demo-tg"<br>
+  port     = 80<br>
+  protocol = "HTTP"<br>
+  vpc_id   = aws_vpc.demo_vpc.id<br>
+}<br>
+<br>
+resource "aws_lb_listener" "demo_listener" {<br>
+  load_balancer_arn = aws_lb.demo_lb.arn<br>
+  port              = 80<br>
+  protocol          = "HTTP"<br>
+<br>
+  default_action {<br>
+    type             = "forward"<br>
+    target_group_arn = aws_lb_target_group.demo_tg.arn<br>
+  }<br>
+}<br>
+<br>
+
+8.terraform init<br>
+9.terraform plan<br>
+10.terraform apply<br>
+<br>
+11.verification <br>
+aws ec2 describe-instances<br>
+aws ec2 describe-vpcs<br>
+aws ec2 describe-security-groups<br>
+aws elbv2 describe-load-balancers<br>
+
+
+
+<br><br>
+----------------------------------
+<br>
 <h2>Ex 6</h2>
 Lab Exercise: Install Ansible in Fedora &✅
 Configure Inventory
