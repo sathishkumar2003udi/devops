@@ -467,3 +467,70 @@ If you want next:<br>
     • ✅ Proper 2-subnet ALB setup<br>
     • ✅ Full EC2 + Target Group working website<br>
 Tell me your goal (learning / interview / job / production).<br><br><br>
+-------------------------------------
+<br>
+
+Jenkins <br><br>
+1.java -version<br><br>
+	sudo dnf install java-17-openjdk -y<br><br>
+java -version<br><br>
+
+2.sudo wget -O /etc/yum.repos.d/jenkins.repo \<br>
+https://pkg.jenkins.io/redhat-stable/jenkins.repo<br><br>
+
+3.sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key<br><br>
+
+4.sudo dnf install jenkins -y<br><br>
+
+5.Start Jenkins:<br><br>
+	sudo systemctl start jenkins<br>
+Enable at boot:<br>
+	sudo systemctl enable jenkins<br>
+Check status:<br>
+	sudo systemctl status jenkins<br><br>
+
+6.Open browser inside VM:<br><br>
+	http://localhost:8080<br><br>
+ 
+Jenkins project that pulls code from GitHub<br><br>
+
+1.git --version<br><br>
+
+2.sudo dnf install git -y<br><br>
+
+3.Open Jenkins in browser<br><br>
+http://localhost:8080<br>
+<br>
+4.Go to:<br>
+Dashboard → Manage Jenkins → Manage Plugins<br><br>
+
+5.Git Plugin<br>
+<br>
+PART 3: Create New Project (Freestyle Project)<br>
+1️⃣ Click New Item<br>
+2️⃣ Enter project name<br>
+Example:<br>
+	MyGitProject<br>
+Select:<br>
+
+Freestyle Project<br><br>
+
+PART 4: Connect GitHub Repository<br>
+Inside project configuration:<br>
+🔹 Step 1: Source Code Management<br>
+• Select Git<br>
+• In Repository URL paste your GitHub repo link<br>
+Example:<br>
+https://github.com/username/repository.git<br><br>
+Step 2: Branch<br>
+	Default branch usually:<br>
+		*/main<br>
+<br>
+Execute shell<br>
+<br>
+Add simple command:<br>
+echo "Build Started"<br>
+ls<br>
+This will show pulled files.<br>
+Click Save<br><br>
+Cloning the remote Git repository<br>
